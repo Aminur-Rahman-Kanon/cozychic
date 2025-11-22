@@ -1,0 +1,138 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// NextAuth models
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          String    @default("CUSTOMER")
+  passwordHash  String?
+
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Cafe models
+model Category {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String?
+  items       Item[]
+  active      Boolean @default(true)
+  sortOrder   Int     @default(0)
+}
+
+model Item {
+  id          String     @id @default(cuid())
+  name        String
+  slug        String     @unique
+  description String?
+  basePrice   Float
+  isMultiPrice Boolean  @default(false)
+  multiPrice  String?
+  imageUrl    String?
+  // SQLite can't store primitive lists, so store tags as a simple string instead
+  // e.g. "vegan,gluten-free,spicy"
+  tags        String?
+  category    Category   @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  active      Boolean    @default(true)
+  isPopular   Boolean    @default(false)
+  isSpecial   Boolean    @default(false)
+
+  // Back-relation to OrderItem
+  orderItems  OrderItem[]
+}
+
+
+model Offer {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  discountPct   Float?
+  discountFixed Float?
+  startsAt      DateTime?
+  endsAt        DateTime?
+  active        Boolean  @default(true)
+}
+
+model Order {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  type       String
+  status     String   @default("NEW")
+  name       String
+  phone      String
+  email      String?
+  address    String?
+  notes      String?
+  total      Float
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  items  OrderItem[]
+}
+
+model OrderItem {
+  id       String @id @default(cuid())
+  order    Order  @relation(fields: [orderId], references: [id])
+  orderId  String
+
+  // Proper relation to Item with opposite field `orderItems` defined above
+  item     Item   @relation(fields: [itemId], references: [id])
+  itemId   String
+
+  name     String
+  quantity Int
+  price    Float
+  notes    String?
+  addOns   String?
+}
