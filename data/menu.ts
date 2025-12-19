@@ -1,0 +1,22 @@
+export const pastaToppings = {
+  "Parmesan cheese": false,
+  "Pecorino Romano": false,
+  "Mozzarella or burrata": false,
+  "Fresh basil": false,
+  "Parsley": false,
+  "Chili flakes": false,
+  "Black pepper": false,
+  "Garlic chips": false,
+  "Toasted breadcrumbs": false,
+  "Olive oil drizzle": false,
+  "Lemon zest": false,
+  "Capers": false,
+  "Sun-dried tomatoes": false,
+  "Pine nuts": false,
+  "Crushed walnuts": false,
+  "Sautéed mushrooms": false,
+  "Caramelized onions": false,
+  "Prosciutto": false,
+  "Bacon or pancetta bits": false,
+  "Olives": false
+};
